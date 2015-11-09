@@ -7,7 +7,7 @@
 		exports["ColorPicker"] = factory(require("React"));
 	else
 		root["ColorPicker"] = factory(root["React"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_14__) {
+})(this, function(__WEBPACK_EXTERNAL_MODULE_1__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -56,12 +56,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var React = __webpack_require__(14);
-	var assign = __webpack_require__(7);
-	var colorUtils = __webpack_require__(2);
+	var React = __webpack_require__(1);
+	var assign = __webpack_require__(2);
+	var colorUtils = __webpack_require__(3);
 
-	var HueSpectrum = __webpack_require__(3);
-	var SaturationSpectrum = __webpack_require__(4);
+	var HueSpectrum = __webpack_require__(5);
+	var SaturationSpectrum = __webpack_require__(27);
 
 	var toHsv = colorUtils.toHsv;
 
@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    getDefaultProps: function getDefaultProps() {
 	        return {
-	            defaultColor: __webpack_require__(5),
+	            defaultColor: __webpack_require__(25),
 	            saturationWidth: 300,
 	            saturationHeight: 300,
 	            hueHeight: null,
@@ -157,7 +157,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return typeof value == 'string' ? toHsv(value) : value;
 	    },
 
-	    toStringValue: __webpack_require__(6),
+	    toStringValue: __webpack_require__(26),
 
 	    handleChange: function handleChange(color) {
 
@@ -209,35 +209,48 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 1 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	'use strict';
-
-	'use once';
-
-	module.exports = function once(fn, scope) {
-
-	    var called;
-	    var result;
-
-	    return function () {
-	        if (called) {
-	            return result;
-	        }
-
-	        called = true;
-
-	        return result = fn.apply(scope || this, arguments);
-	    };
-	};
+	module.exports = __WEBPACK_EXTERNAL_MODULE_1__;
 
 /***/ },
 /* 2 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	function ToObject(val) {
+		if (val == null) {
+			throw new TypeError('Object.assign cannot be called with null or undefined');
+		}
+
+		return Object(val);
+	}
+
+	module.exports = Object.assign || function (target, source) {
+		var from;
+		var keys;
+		var to = ToObject(target);
+
+		for (var s = 1; s < arguments.length; s++) {
+			from = arguments[s];
+			keys = Object.keys(Object(from));
+
+			for (var i = 0; i < keys.length; i++) {
+				to[keys[i]] = from[keys[i]];
+			}
+		}
+
+		return to;
+	};
+
+/***/ },
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var tinycolor = __webpack_require__(11);
+	var tinycolor = __webpack_require__(4);
 
 	if (typeof window != 'undefined') {
 	    window.tinycolor = tinycolor;
@@ -287,557 +300,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Color;
 
 /***/ },
-/* 3 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var React = __webpack_require__(14);
-	var Region = __webpack_require__(10);
-	var assign = __webpack_require__(7);
-	var common = __webpack_require__(8);
-
-	var VALIDATE = __webpack_require__(9);
-
-	module.exports = React.createClass(assign({
-
-	    displayName: 'HueSpectrum',
-
-	    getDefaultProps: function getDefaultProps() {
-	        return {
-	            height: 300,
-	            width: 30,
-	            pointerSize: 3,
-	            defaultColor: __webpack_require__(5)
-	        };
-	    },
-
-	    getInitialState: function getInitialState() {
-	        return {
-	            h: 0
-	        };
-	    },
-
-	    componentDidUpdate: function componentDidUpdate() {},
-
-	    componentDidMount: function componentDidMount() {
-	        this.updateDragPositionIf();
-	    },
-
-	    updateDragPositionIf: function updateDragPositionIf() {
-
-	        if (!this.props.height) {
-	            this.setState({});
-	        }
-	    },
-
-	    render: function render() {
-	        this.hsv = this.toColorValue(this.state.value || this.props.value || this.props.defaultValue || this.props.defaultColor);
-	        // console.log('hue:', this.hsv)
-
-	        if (this.state.h == 360 && !this.hsv.h) {
-	            //in order to show bottom red as well on drag
-	            this.hsv.h = 360;
-	        }
-
-	        var style = assign({}, this.props.style);
-
-	        if (this.props.height) {
-	            style.height = this.props.height;
-	        }
-	        if (this.props.width) {
-	            style.width = this.props.width;
-	        }
-
-	        var dragStyle = {
-	            height: this.props.pointerSize
-	        };
-
-	        var dragPos = this.getDragPosition();
-
-	        if (dragPos != null) {
-	            dragStyle.top = dragPos;
-	            dragStyle.display = 'block';
-	        }
-	        return React.createElement(
-	            'div',
-	            { className: 'cp-hue-spectrum', style: style, onMouseDown: this.onMouseDown },
-	            React.createElement(
-	                'div',
-	                { className: 'cp-hue-drag', style: dragStyle },
-	                React.createElement('div', { className: 'inner' })
-	            )
-	        );
-	    },
-
-	    getDragPosition: function getDragPosition(hsv) {
-	        hsv = hsv || this.hsv;
-
-	        if (!this.props.height && !this.isMounted()) {
-	            return null;
-	        }
-
-	        var height = this.props.height || Region.fromDOM(this.getDOMNode()).getHeight();
-	        var size = this.props.pointerSize;
-
-	        var pos = Math.round(hsv.h * height / 360);
-	        var diff = Math.round(size / 2);
-
-	        return pos - diff;
-	    },
-
-	    updateColor: function updateColor(point) {
-	        point = VALIDATE(point);
-
-	        this.hsv.h = point.y * 360 / point.height;
-
-	        if (this.hsv.h != 0) {
-	            this.state.h = this.hsv.h;
-	        }
-
-	        this.state.h = this.hsv.h != 0 ? this.hsv.h : 0;
-	    },
-
-	    toStringValue: __webpack_require__(6)
-	}, common));
-
-	// this.updateDragPositionIf()
-
-/***/ },
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
-
-	Object.defineProperty(exports, '__esModule', {
-	    value: true
-	});
-	var React = __webpack_require__(14);
-	var Region = __webpack_require__(10);
-	var assign = __webpack_require__(7);
-	var fromRatio = __webpack_require__(2).fromRatio;
-	var common = __webpack_require__(8);
-
-	var VALIDATE = __webpack_require__(9);
-
-	exports['default'] = React.createClass(assign({
-
-	    displayName: 'SaturationSpectrum',
-
-	    getDefaultProps: function getDefaultProps() {
-	        return {
-	            height: 300,
-	            width: 300,
-	            pointerSize: 7,
-	            defaultColor: __webpack_require__(5)
-	        };
-	    },
-
-	    getInitialState: function getInitialState() {
-	        return {
-	            pointerTop: null,
-	            pointerLeft: null
-	        };
-	    },
-
-	    componentDidUpdate: function componentDidUpdate() {},
-
-	    componentDidMount: function componentDidMount() {
-	        this.updateDragPositionIf();
-	    },
-
-	    updateDragPositionIf: function updateDragPositionIf() {
-	        if (!this.props.height || !this.props.width) {
-	            this.setState({});
-	        }
-	    },
-
-	    getDragPosition: function getDragPosition(hsv) {
-	        hsv = hsv || this.hsv;
-
-	        var width = this.props.width;
-	        var height = this.props.height;
-	        var sizeDefined = width && height;
-
-	        if (!sizeDefined && !this.isMounted()) {
-	            return null;
-	        }
-
-	        var region;
-
-	        if (!sizeDefined) {
-	            region = Region.fromDOM(this.getDOMNode());
-	            height = height || region.getHeight();
-	            width = width || region.getWidth();
-	        }
-
-	        var x = hsv.s * width;
-	        var y = height - hsv.v * height;
-	        var size = this.props.pointerSize;
-	        var diff = Math.floor(size / 2);
-
-	        if (this.props.value && this.state.mouseDown) {
-	            x = this.state.mouseDown.x;
-	        }
-
-	        return {
-	            left: x - diff,
-	            top: y - diff
-	        };
-	    },
-
-	    prepareBackgroundColor: function prepareBackgroundColor(color) {
-	        var hsv = color;
-
-	        var col = fromRatio({
-	            h: hsv.h % 360 / 360,
-	            s: 1,
-	            v: 1
-	        });
-
-	        return col.toRgbString();
-	    },
-
-	    prepareProps: function prepareProps(thisProps, state) {
-	        var props = assign({}, thisProps);
-
-	        var color = state.value || props.value || props.defaultValue || props.defaultColor;
-
-	        props.color = color;
-
-	        this.hsv = this.toColorValue(color);
-
-	        props.style = this.prepareStyle(props);
-	        props.className = this.prepareClassName(props);
-
-	        return props;
-	    },
-
-	    prepareClassName: function prepareClassName(props) {
-	        var className = props.className || '';
-
-	        className += ' cp-saturation-spectrum';
-
-	        return className;
-	    },
-
-	    prepareStyle: function prepareStyle(props) {
-	        var style = props.style || {};
-
-	        if (props.height) {
-	            style.height = props.height;
-	        }
-	        if (props.width) {
-	            style.width = props.width;
-	        }
-
-	        style.backgroundColor = this.prepareBackgroundColor(this.hsv);
-
-	        return style;
-	    },
-
-	    render: function render() {
-
-	        var props = this.p = this.prepareProps(this.props, this.state);
-
-	        var dragStyle = {
-	            width: this.props.pointerSize,
-	            height: this.props.pointerSize
-	        };
-
-	        var dragPos = this.getDragPosition();
-
-	        if (dragPos) {
-	            dragStyle.top = dragPos.top;
-	            dragStyle.left = dragPos.left;
-	            dragStyle.display = 'block';
-	        }
-
-	        return React.createElement(
-	            'div',
-	            { className: props.className, style: props.style, onMouseDown: this.onMouseDown },
-	            React.createElement(
-	                'div',
-	                { className: 'cp-saturation-white' },
-	                React.createElement('div', { className: 'cp-saturation-black' })
-	            ),
-	            React.createElement(
-	                'div',
-	                { className: 'cp-saturation-drag', style: dragStyle },
-	                React.createElement('div', { className: 'inner' })
-	            )
-	        );
-	    },
-
-	    getSaturationForPoint: function getSaturationForPoint(point) {
-	        return point.x / point.width;
-	    },
-
-	    getColorValueForPoint: function getColorValueForPoint(point) {
-	        return (point.height - point.y) / point.height;
-	    },
-
-	    updateColor: function updateColor(point) {
-	        point = VALIDATE(point);
-
-	        this.hsv.s = this.getSaturationForPoint(point);
-	        this.hsv.v = this.getColorValueForPoint(point);
-	    },
-
-	    toStringValue: __webpack_require__(6)
-	}, common));
-	module.exports = exports['default'];
-
-	// this.updateDragPositionIf()
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	module.exports = 'red';
-
-/***/ },
-/* 6 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var assign = __webpack_require__(7);
-	var toColor = __webpack_require__(2).toColor;
-
-	module.exports = function toStringValue(color) {
-	    color = toColor(assign({}, color));
-
-	    return color.toRgb().a == 1 ? color.toHexString() : color.toRgbString();
-	};
-
-/***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	function ToObject(val) {
-		if (val == null) {
-			throw new TypeError('Object.assign cannot be called with null or undefined');
-		}
-
-		return Object(val);
-	}
-
-	module.exports = Object.assign || function (target, source) {
-		var from;
-		var keys;
-		var to = ToObject(target);
-
-		for (var s = 1; s < arguments.length; s++) {
-			from = arguments[s];
-			keys = Object.keys(Object(from));
-
-			for (var i = 0; i < keys.length; i++) {
-				to[keys[i]] = from[keys[i]];
-			}
-		}
-
-		return to;
-	};
-
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, '__esModule', {
-	    value: true
-	});
-	var Region = __webpack_require__(10);
-	var assign = __webpack_require__(7);
-	var DragHelper = __webpack_require__(12);
-	var toHsv = __webpack_require__(2).toHsv;
-
-	function emptyFn() {}
-
-	exports['default'] = {
-
-	    toColorValue: function toColorValue(value) {
-	        if (typeof value == 'string') {
-	            return toHsv(value);
-	        }
-
-	        return {
-	            h: value.h,
-	            s: value.s,
-	            v: value.v,
-	            a: value.a
-	        };
-	    },
-
-	    onMouseDown: function onMouseDown(event) {
-	        event.preventDefault();
-
-	        var region = Region.fromDOM(this.getDOMNode());
-	        var info = this.getEventInfo(event, region);
-
-	        DragHelper(event, {
-	            scope: this,
-
-	            constrainTo: region,
-
-	            onDragStart: function onDragStart(event, config) {
-	                config.initialPoint = info;
-
-	                config.minLeft = 0;
-	                config.maxLeft = region.width;
-
-	                this.handleDragStart(event);
-	            },
-	            onDrag: function onDrag(event, config) {
-	                var info = this.getEventInfo(event, region);
-
-	                this.updateColor(info);
-	                this.handleDrag(event, config);
-	            },
-	            onDrop: function onDrop(event, config) {
-	                var info = this.getEventInfo(event, region);
-
-	                this.updateColor(info);
-
-	                this.handleDrop(event, config);
-	            }
-	        });
-
-	        this.updateColor(info);
-	        this.handleMouseDown(event, { initialPoint: info });
-	    },
-
-	    handleMouseDown: function handleMouseDown(event, config) {
-
-	        ;(this.props.onMouseDown || emptyFn).apply(this, this.getColors());
-	        this.handleDrag(event, config);
-	    },
-
-	    handleUpdate: function handleUpdate(event, config) {
-
-	        var diff = config.diff || { top: 0, left: 0 };
-	        var initialPoint = config.initialPoint;
-
-	        if (initialPoint) {
-
-	            var top;
-	            var left;
-
-	            left = initialPoint.x + diff.left;
-	            top = initialPoint.y + diff.top;
-
-	            left = Math.max(left, config.minLeft);
-	            left = Math.min(left, config.maxLeft);
-
-	            this.state.top = top;
-	            this.state.left = left;
-
-	            this.state.mouseDown = {
-	                x: left,
-	                y: top,
-	                width: initialPoint.width,
-	                height: initialPoint.height
-	            };
-	        }
-
-	        if (this.props.inPicker) {
-	            //the picker handles the values
-	            return;
-	        }
-
-	        if (!this.props.value) {
-	            this.setState({
-	                value: this.hsv
-	            });
-	        }
-	    },
-
-	    handleDragStart: function handleDragStart(event) {},
-
-	    handleDrag: function handleDrag(event, config) {
-	        this.handleUpdate(event, config);(this.props.onDrag || emptyFn).apply(this, this.getColors());
-	    },
-
-	    handleDrop: function handleDrop(event, config) {
-	        this.handleUpdate(event, config);
-	        this.state.mouseDown = false;(this.props.onChange || emptyFn).apply(this, this.getColors());
-	    },
-
-	    getColors: function getColors() {
-	        var first = this.props.inPicker ? this.hsv : this.toStringValue(this.hsv);
-	        var args = [first];
-
-	        if (!this.props.inPicker) {
-	            args.push(assign({}, this.hsv));
-	        }
-
-	        return args;
-	    },
-
-	    getEventInfo: function getEventInfo(event, region) {
-	        region = region || Region.fromDOM(this.getDOMNode());
-
-	        var x = event.clientX - region.left;
-	        var y = event.clientY - region.top;
-
-	        return {
-	            x: x,
-	            y: y,
-	            width: region.getWidth(),
-	            height: region.getHeight()
-	        };
-	    }
-	};
-	module.exports = exports['default'];
-
-/***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	module.exports = function validate(info) {
-	    var height = info.height;
-	    var width = info.width;
-
-	    if (info.x < 0) {
-	        info.x = 0;
-	    }
-
-	    if (info.x >= width) {
-	        info.x = width;
-	    }
-
-	    if (info.y < 0) {
-	        info.y = 0;
-	    }
-
-	    if (info.y >= height) {
-	        info.y = height;
-	    }
-
-	    return info;
-	};
-
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	module.exports = __webpack_require__(13);
-
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var __WEBPACK_AMD_DEFINE_RESULT__;// TinyColor v1.1.1
+	var __WEBPACK_AMD_DEFINE_RESULT__;// TinyColor v1.1.2
 	// https://github.com/bgrins/TinyColor
 	// Brian Grinstead, MIT License
 
@@ -854,9 +320,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        mathMax = math.max,
 	        mathRandom = math.random;
 
-	    var tinycolor = function tinycolor(color, opts) {
+	    function tinycolor(color, opts) {
 
-	        color = color ? color : "";
+	        color = color ? color : '';
 	        opts = opts || {};
 
 	        // If input is already a tinycolor, return itself
@@ -888,7 +354,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        this._ok = rgb.ok;
 	        this._tc_id = tinyCounter++;
-	    };
+	    }
 
 	    tinycolor.prototype = {
 	        isDark: function isDark() {
@@ -910,8 +376,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return this._a;
 	        },
 	        getBrightness: function getBrightness() {
+	            //http://www.w3.org/TR/AERT#color-contrast
 	            var rgb = this.toRgb();
 	            return (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
+	        },
+	        getLuminance: function getLuminance() {
+	            //http://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
+	            var rgb = this.toRgb();
+	            var RsRGB, GsRGB, BsRGB, R, G, B;
+	            RsRGB = rgb.r / 255;
+	            GsRGB = rgb.g / 255;
+	            BsRGB = rgb.b / 255;
+
+	            if (RsRGB <= 0.03928) {
+	                R = RsRGB / 12.92;
+	            } else {
+	                R = Math.pow((RsRGB + 0.055) / 1.055, 2.4);
+	            }
+	            if (GsRGB <= 0.03928) {
+	                G = GsRGB / 12.92;
+	            } else {
+	                G = Math.pow((GsRGB + 0.055) / 1.055, 2.4);
+	            }
+	            if (BsRGB <= 0.03928) {
+	                B = BsRGB / 12.92;
+	            } else {
+	                B = Math.pow((BsRGB + 0.055) / 1.055, 2.4);
+	            }
+	            return 0.2126 * R + 0.7152 * G + 0.0722 * B;
 	        },
 	        setAlpha: function setAlpha(value) {
 	            this._a = boundAlpha(value);
@@ -944,13 +436,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return rgbToHex(this._r, this._g, this._b, allow3Char);
 	        },
 	        toHexString: function toHexString(allow3Char) {
-	            return "#" + this.toHex(allow3Char);
+	            return '#' + this.toHex(allow3Char);
 	        },
 	        toHex8: function toHex8() {
 	            return rgbaToHex(this._r, this._g, this._b, this._a);
 	        },
 	        toHex8String: function toHex8String() {
-	            return "#" + this.toHex8();
+	            return '#' + this.toHex8();
 	        },
 	        toRgb: function toRgb() {
 	            return { r: mathRound(this._r), g: mathRound(this._g), b: mathRound(this._b), a: this._a };
@@ -976,7 +468,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return hexNames[rgbToHex(this._r, this._g, this._b, true)] || false;
 	        },
 	        toFilter: function toFilter(secondColor) {
-	            var hex8String = "#" + rgbaToHex(this._r, this._g, this._b, this._a);
+	            var hex8String = '#' + rgbaToHex(this._r, this._g, this._b, this._a);
 	            var secondHex8String = hex8String;
 	            var gradientType = this._gradientType ? "GradientType = 1, " : "";
 
@@ -1204,19 +696,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (max == min) {
 	            h = s = 0; // achromatic
 	        } else {
-	            var d = max - min;
-	            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-	            switch (max) {
-	                case r:
-	                    h = (g - b) / d + (g < b ? 6 : 0);break;
-	                case g:
-	                    h = (b - r) / d + 2;break;
-	                case b:
-	                    h = (r - g) / d + 4;break;
-	            }
+	                var d = max - min;
+	                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+	                switch (max) {
+	                    case r:
+	                        h = (g - b) / d + (g < b ? 6 : 0);break;
+	                    case g:
+	                        h = (b - r) / d + 2;break;
+	                    case b:
+	                        h = (r - g) / d + 4;break;
+	                }
 
-	            h /= 6;
-	        }
+	                h /= 6;
+	            }
 
 	        return { h: h, s: s, l: l };
 	    }
@@ -1244,12 +736,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (s === 0) {
 	            r = g = b = l; // achromatic
 	        } else {
-	            var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-	            var p = 2 * l - q;
-	            r = hue2rgb(p, q, h + 1 / 3);
-	            g = hue2rgb(p, q, h);
-	            b = hue2rgb(p, q, h - 1 / 3);
-	        }
+	                var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+	                var p = 2 * l - q;
+	                r = hue2rgb(p, q, h + 1 / 3);
+	                g = hue2rgb(p, q, h);
+	                b = hue2rgb(p, q, h - 1 / 3);
+	            }
 
 	        return { r: r * 255, g: g * 255, b: b * 255 };
 	    }
@@ -1276,16 +768,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (max == min) {
 	            h = 0; // achromatic
 	        } else {
-	            switch (max) {
-	                case r:
-	                    h = (g - b) / d + (g < b ? 6 : 0);break;
-	                case g:
-	                    h = (b - r) / d + 2;break;
-	                case b:
-	                    h = (r - g) / d + 4;break;
+	                switch (max) {
+	                    case r:
+	                        h = (g - b) / d + (g < b ? 6 : 0);break;
+	                    case g:
+	                        h = (b - r) / d + 2;break;
+	                    case b:
+	                        h = (r - g) / d + 4;break;
+	                }
+	                h /= 6;
 	            }
-	            h /= 6;
-	        }
 	        return { h: h, s: s, v: v };
 	    }
 
@@ -1511,62 +1003,83 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    // Readability Functions
 	    // ---------------------
-	    // <http://www.w3.org/TR/AERT#color-contrast>
+	    // <http://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef (WCAG Version 2)
 
-	    // `readability`
-	    // Analyze the 2 colors and returns an object with the following properties:
-	    //    `brightness`: difference in brightness between the two colors
-	    //    `color`: difference in color/hue between the two colors
+	    // `contrast`
+	    // Analyze the 2 colors and returns the color contrast defined by (WCAG Version 2)
 	    tinycolor.readability = function (color1, color2) {
 	        var c1 = tinycolor(color1);
 	        var c2 = tinycolor(color2);
-	        var rgb1 = c1.toRgb();
-	        var rgb2 = c2.toRgb();
-	        var brightnessA = c1.getBrightness();
-	        var brightnessB = c2.getBrightness();
-	        var colorDiff = Math.max(rgb1.r, rgb2.r) - Math.min(rgb1.r, rgb2.r) + Math.max(rgb1.g, rgb2.g) - Math.min(rgb1.g, rgb2.g) + Math.max(rgb1.b, rgb2.b) - Math.min(rgb1.b, rgb2.b);
-
-	        return {
-	            brightness: Math.abs(brightnessA - brightnessB),
-	            color: colorDiff
-	        };
+	        return (Math.max(c1.getLuminance(), c2.getLuminance()) + 0.05) / (Math.min(c1.getLuminance(), c2.getLuminance()) + 0.05);
 	    };
 
-	    // `readable`
-	    // http://www.w3.org/TR/AERT#color-contrast
-	    // Ensure that foreground and background color combinations provide sufficient contrast.
+	    // `isReadable`
+	    // Ensure that foreground and background color combinations meet WCAG2 guidelines.
+	    // The third argument is an optional Object.
+	    //      the 'level' property states 'AA' or 'AAA' - if missing or invalid, it defaults to 'AA';
+	    //      the 'size' property states 'large' or 'small' - if missing or invalid, it defaults to 'small'.
+	    // If the entire object is absent, isReadable defaults to {level:"AA",size:"small"}.
+
 	    // *Example*
 	    //    tinycolor.isReadable("#000", "#111") => false
-	    tinycolor.isReadable = function (color1, color2) {
+	    //    tinycolor.isReadable("#000", "#111",{level:"AA",size:"large"}) => false
+
+	    tinycolor.isReadable = function (color1, color2, wcag2) {
 	        var readability = tinycolor.readability(color1, color2);
-	        return readability.brightness > 125 && readability.color > 500;
+	        var wcag2Parms, out;
+
+	        out = false;
+
+	        wcag2Parms = validateWCAG2Parms(wcag2);
+	        switch (wcag2Parms.level + wcag2Parms.size) {
+	            case "AAsmall":
+	            case "AAAlarge":
+	                out = readability >= 4.5;
+	                break;
+	            case "AAlarge":
+	                out = readability >= 3;
+	                break;
+	            case "AAAsmall":
+	                out = readability >= 7;
+	                break;
+	        }
+	        return out;
 	    };
 
 	    // `mostReadable`
 	    // Given a base color and a list of possible foreground or background
 	    // colors for that base, returns the most readable color.
+	    // Optionally returns Black or White if the most readable color is unreadable.
 	    // *Example*
-	    //    tinycolor.mostReadable("#123", ["#fff", "#000"]) => "#000"
-	    tinycolor.mostReadable = function (baseColor, colorList) {
+	    //    tinycolor.mostReadable(tinycolor.mostReadable("#123", ["#124", "#125"],{includeFallbackColors:false}).toHexString(); // "#112255"
+	    //    tinycolor.mostReadable(tinycolor.mostReadable("#123", ["#124", "#125"],{includeFallbackColors:true}).toHexString();  // "#ffffff"
+	    //    tinycolor.mostReadable("#a8015a", ["#faf3f3"],{includeFallbackColors:true,level:"AAA",size:"large"}).toHexString(); // "#faf3f3"
+	    //    tinycolor.mostReadable("#a8015a", ["#faf3f3"],{includeFallbackColors:true,level:"AAA",size:"small"}).toHexString(); // "#ffffff"
+
+	    tinycolor.mostReadable = function (baseColor, colorList, args) {
 	        var bestColor = null;
 	        var bestScore = 0;
-	        var bestIsReadable = false;
+	        var readability;
+	        var includeFallbackColors, level, size;
+	        args = args || {};
+	        includeFallbackColors = args.includeFallbackColors;
+	        level = args.level;
+	        size = args.size;
+
 	        for (var i = 0; i < colorList.length; i++) {
-
-	            // We normalize both around the "acceptable" breaking point,
-	            // but rank brightness constrast higher than hue.
-
-	            var readability = tinycolor.readability(baseColor, colorList[i]);
-	            var readable = readability.brightness > 125 && readability.color > 500;
-	            var score = 3 * (readability.brightness / 125) + readability.color / 500;
-
-	            if (readable && !bestIsReadable || readable && bestIsReadable && score > bestScore || !readable && !bestIsReadable && score > bestScore) {
-	                bestIsReadable = readable;
-	                bestScore = score;
+	            readability = tinycolor.readability(baseColor, colorList[i]);
+	            if (readability > bestScore) {
+	                bestScore = readability;
 	                bestColor = tinycolor(colorList[i]);
 	            }
 	        }
-	        return bestColor;
+
+	        if (tinycolor.isReadable(baseColor, bestColor, { "level": level, "size": size }) || !includeFallbackColors) {
+	            return bestColor;
+	        } else {
+	            args.includeFallbackColors = false;
+	            return tinycolor.mostReadable(baseColor, ["#fff", "#000"], args);
+	        }
 	    };
 
 	    // Big List of Colors
@@ -1788,17 +1301,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // Need to handle 1.0 as 100%, since once it is a number, there is no difference between it and 1
 	    // <http://stackoverflow.com/questions/7422072/javascript-how-to-detect-number-as-a-decimal-including-1-0>
 	    function isOnePointZero(n) {
-	        return typeof n == "string" && n.indexOf(".") != -1 && parseFloat(n) === 1;
+	        return typeof n == "string" && n.indexOf('.') != -1 && parseFloat(n) === 1;
 	    }
 
 	    // Check to see if string passed in is a percentage
 	    function isPercentage(n) {
-	        return typeof n === "string" && n.indexOf("%") != -1;
+	        return typeof n === "string" && n.indexOf('%') != -1;
 	    }
 
 	    // Force a hex value to have 2 characters
 	    function pad2(c) {
-	        return c.length == 1 ? "0" + c : "" + c;
+	        return c.length == 1 ? '0' + c : '' + c;
 	    }
 
 	    // Replace a decimal with it's percentage value
@@ -1854,12 +1367,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // based on detected format.  Returns `{ r, g, b }` or `{ h, s, l }` or `{ h, s, v}`
 	    function stringInputToObject(color) {
 
-	        color = color.replace(trimLeft, "").replace(trimRight, "").toLowerCase();
+	        color = color.replace(trimLeft, '').replace(trimRight, '').toLowerCase();
 	        var named = false;
 	        if (names[color]) {
 	            color = names[color];
 	            named = true;
-	        } else if (color == "transparent") {
+	        } else if (color == 'transparent') {
 	            return { r: 0, g: 0, b: 0, a: 0, format: "name" };
 	        }
 
@@ -1905,9 +1418,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        if (match = matchers.hex3.exec(color)) {
 	            return {
-	                r: parseIntFromHex(match[1] + "" + match[1]),
-	                g: parseIntFromHex(match[2] + "" + match[2]),
-	                b: parseIntFromHex(match[3] + "" + match[3]),
+	                r: parseIntFromHex(match[1] + '' + match[1]),
+	                g: parseIntFromHex(match[2] + '' + match[2]),
+	                b: parseIntFromHex(match[3] + '' + match[3]),
 	                format: named ? "name" : "hex"
 	            };
 	        }
@@ -1915,233 +1428,176 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return false;
 	    }
 
+	    function validateWCAG2Parms(parms) {
+	        // return valid WCAG2 parms for isReadable.
+	        // If input parms are invalid, return {"level":"AA", "size":"small"}
+	        var level, size;
+	        parms = parms || { "level": "AA", "size": "small" };
+	        level = (parms.level || "AA").toUpperCase();
+	        size = (parms.size || "small").toLowerCase();
+	        if (level !== "AA" && level !== "AAA") {
+	            level = "AA";
+	        }
+	        if (size !== "small" && size !== "large") {
+	            size = "small";
+	        }
+	        return { "level": level, "size": size };
+	    }
 	    // Node: Export function
 	    if (typeof module !== "undefined" && module.exports) {
 	        module.exports = tinycolor;
 	    }
 	    // AMD/requirejs: Define the module
 	    else if (true) {
-	        !(__WEBPACK_AMD_DEFINE_RESULT__ = function () {
-	            return tinycolor;
-	        }.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-	    }
-	    // Browser: Expose to window
-	    else {
-	        window.tinycolor = tinycolor;
-	    }
+	            !(__WEBPACK_AMD_DEFINE_RESULT__ = function () {
+	                return tinycolor;
+	            }.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	        }
+	        // Browser: Expose to window
+	        else {
+	                window.tinycolor = tinycolor;
+	            }
 	})();
 
 /***/ },
-/* 12 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var assign = __webpack_require__(7);
-	var Region = __webpack_require__(18);
-	var hasTouch = __webpack_require__(19);
-	var once = __webpack_require__(1);
+	var React = __webpack_require__(1);
+	var Region = __webpack_require__(6);
+	var assign = __webpack_require__(2);
+	var common = __webpack_require__(15);
 
-	var Helper = function Helper(config) {
-	    this.config = config;
-	};
+	var VALIDATE = __webpack_require__(24);
 
-	var EVENTS = {
-	    move: hasTouch ? 'touchmove' : 'mousemove',
-	    up: hasTouch ? 'touchend' : 'mouseup'
-	};
+	module.exports = React.createClass(assign({
 
-	function emptyFn() {}
+	    displayName: 'HueSpectrum',
 
-	function getPageCoords(event) {
-	    var firstTouch;
-
-	    var pageX = event.pageX;
-	    var pageY = event.pageY;
-
-	    if (hasTouch && event.touches && (firstTouch = event.touches[0])) {
-	        pageX = firstTouch.pageX;
-	        pageY = firstTouch.pageY;
-	    }
-
-	    return {
-	        pageX: pageX,
-	        pageY: pageY
-	    };
-	}
-
-	assign(Helper.prototype, {
-
-	    /**
-	     * Should be called on a mousedown event
-	     *
-	     * @param  {Event} event
-	     * @return {[type]}       [description]
-	     */
-	    initDrag: function initDrag(event) {
-
-	        this.onDragInit(event);
-
-	        var onDragStart = once(this.onDragStart, this);
-	        var target = hasTouch ? event.target : window;
-
-	        var mouseMoveListener = (function (event) {
-	            onDragStart(event);
-	            this.onDrag(event);
-	        }).bind(this);
-
-	        var mouseUpListener = (function (event) {
-
-	            this.onDrop(event);
-
-	            target.removeEventListener(EVENTS.move, mouseMoveListener);
-	            target.removeEventListener(EVENTS.up, mouseUpListener);
-	        }).bind(this);
-
-	        target.addEventListener(EVENTS.move, mouseMoveListener, false);
-	        target.addEventListener(EVENTS.up, mouseUpListener);
+	    getDefaultProps: function getDefaultProps() {
+	        return {
+	            height: 300,
+	            width: 30,
+	            pointerSize: 3,
+	            defaultColor: __webpack_require__(25)
+	        };
 	    },
 
-	    onDragInit: function onDragInit(event) {
-
-	        var config = {
-	            diff: {
-	                left: 0,
-	                top: 0
-	            }
+	    getInitialState: function getInitialState() {
+	        return {
+	            h: 0
 	        };
-	        this.state = {
-	            config: config
-	        };
+	    },
 
-	        if (this.config.region) {
-	            this.state.initialRegion = Region.from(this.config.region);
-	            this.state.dragRegion = config.dragRegion = this.state.initialRegion.clone();
+	    componentDidUpdate: function componentDidUpdate() {
+	        // this.updateDragPositionIf()
+	    },
+
+	    componentDidMount: function componentDidMount() {
+	        this.updateDragPositionIf();
+	    },
+
+	    updateDragPositionIf: function updateDragPositionIf() {
+
+	        if (!this.props.height) {
+	            this.setState({});
 	        }
-	        if (this.config.constrainTo) {
-	            this.state.constrainTo = Region.from(this.config.constrainTo);
+	    },
+
+	    render: function render() {
+	        this.hsv = this.toColorValue(this.state.value || this.props.value || this.props.defaultValue || this.props.defaultColor);
+	        // console.log('hue:', this.hsv)
+
+	        if (this.state.h == 360 && !this.hsv.h) {
+	            //in order to show bottom red as well on drag
+	            this.hsv.h = 360;
 	        }
 
-	        this.callConfig('onDragInit', event);
-	    },
+	        var style = assign({}, this.props.style);
 
-	    /**
-	     * Called when the first mousemove event occurs after drag is initialized
-	     * @param  {Event} event
-	     */
-	    onDragStart: function onDragStart(event) {
-	        this.state.initPageCoords = getPageCoords(event);
-
-	        this.state.didDrag = this.state.config.didDrag = true;
-	        this.callConfig('onDragStart', event);
-	    },
-
-	    /**
-	     * Called on all mousemove events after drag is initialized.
-	     *
-	     * @param  {Event} event
-	     */
-	    onDrag: function onDrag(event) {
-
-	        var config = this.state.config;
-
-	        var initPageCoords = this.state.initPageCoords;
-	        var eventCoords = getPageCoords(event);
-
-	        var diff = config.diff = {
-	            left: eventCoords.pageX - initPageCoords.pageX,
-	            top: eventCoords.pageY - initPageCoords.pageY
-	        };
-
-	        if (this.state.initialRegion) {
-	            var dragRegion = config.dragRegion;
-
-	            //set the dragRegion to initial coords
-	            dragRegion.set(this.state.initialRegion);
-
-	            //shift it to the new position
-	            dragRegion.shift(diff);
-
-	            if (this.state.constrainTo) {
-	                //and finally constrain it if it's the case
-	                dragRegion.constrainTo(this.state.constrainTo);
-
-	                diff.left = dragRegion.left - this.state.initialRegion.left;
-	                diff.top = dragRegion.top - this.state.initialRegion.top;
-	            }
-
-	            config.dragRegion = dragRegion;
+	        if (this.props.height) {
+	            style.height = this.props.height;
+	        }
+	        if (this.props.width) {
+	            style.width = this.props.width;
 	        }
 
-	        this.callConfig('onDrag', event);
-	    },
-
-	    /**
-	     * Called on the mouseup event on window
-	     *
-	     * @param  {Event} event
-	     */
-	    onDrop: function onDrop(event) {
-	        this.callConfig('onDrop', event);
-
-	        this.state = null;
-	    },
-
-	    callConfig: function callConfig(fnName, event) {
-	        var config = this.state.config;
-	        var args = [event, config];
-
-	        var fn = this.config[fnName];
-
-	        if (fn) {
-	            fn.apply(this, args);
-	        }
-	    }
-
-	});
-
-	module.exports = function (event, config) {
-
-	    if (config.scope) {
-	        var skippedKeys = {
-	            scope: 1,
-	            region: 1,
-	            constrainTo: 1
+	        var dragStyle = {
+	            height: this.props.pointerSize
 	        };
 
-	        Object.keys(config).forEach(function (key) {
-	            var value = config[key];
+	        var dragPos = this.getDragPosition();
 
-	            if (key in skippedKeys) {
-	                return;
-	            }
+	        if (dragPos != null) {
+	            dragStyle.top = dragPos;
+	            dragStyle.display = 'block';
+	        }
+	        return React.createElement(
+	            'div',
+	            { ref: 'el', className: 'cp-hue-spectrum', style: style, onMouseDown: this.onMouseDown },
+	            React.createElement(
+	                'div',
+	                { className: 'cp-hue-drag', style: dragStyle },
+	                React.createElement('div', { className: 'inner' })
+	            )
+	        );
+	    },
 
-	            if (typeof value == 'function') {
-	                config[key] = value.bind(config.scope);
-	            }
-	        });
-	    }
-	    var helper = new Helper(config);
+	    getDragPosition: function getDragPosition(hsv) {
+	        hsv = hsv || this.hsv;
 
-	    helper.initDrag(event);
+	        if (!this.props.height && !this.isMounted()) {
+	            return null;
+	        }
 
-	    return helper;
-	};
+	        var height = this.props.height || Region.fromDOM(this.refs.el).getHeight();
+	        var size = this.props.pointerSize;
+
+	        var pos = Math.round(hsv.h * height / 360);
+	        var diff = Math.round(size / 2);
+
+	        return pos - diff;
+	    },
+
+	    updateColor: function updateColor(point) {
+	        point = VALIDATE(point);
+
+	        this.hsv.h = point.y * 360 / point.height;
+
+	        if (this.hsv.h != 0) {
+	            this.state.h = this.hsv.h;
+	        }
+
+	        this.state.h = this.hsv.h != 0 ? this.hsv.h : 0;
+	    },
+
+	    toStringValue: __webpack_require__(26)
+	}, common));
 
 /***/ },
-/* 13 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var hasOwn = __webpack_require__(21);
-	var newify = __webpack_require__(20);
+	module.exports = __webpack_require__(7);
 
-	var assign = __webpack_require__(7);
-	var EventEmitter = __webpack_require__(22).EventEmitter;
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
 
-	var inherits = __webpack_require__(15);
-	var VALIDATE = __webpack_require__(16);
+	'use strict';
+
+	var hasOwn = __webpack_require__(8);
+	var newify = __webpack_require__(9);
+
+	var assign = __webpack_require__(2);
+	var EventEmitter = __webpack_require__(11).EventEmitter;
+
+	var inherits = __webpack_require__(12);
+	var VALIDATE = __webpack_require__(13);
 
 	var objectToString = Object.prototype.toString;
 
@@ -3167,19 +2623,365 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	});
 
-	__webpack_require__(17)(REGION);
+	__webpack_require__(14)(REGION);
 
 	module.exports = REGION;
 
 /***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
+/* 8 */
+/***/ function(module, exports) {
 
-	module.exports = __WEBPACK_EXTERNAL_MODULE_14__;
+	'use strict';
+
+	var hasOwn = Object.prototype.hasOwnProperty;
+
+	function curry(fn, n) {
+
+	    if (typeof n !== 'number') {
+	        n = fn.length;
+	    }
+
+	    function getCurryClosure(prevArgs) {
+
+	        function curryClosure() {
+
+	            var len = arguments.length;
+	            var args = [].concat(prevArgs);
+
+	            if (len) {
+	                args.push.apply(args, arguments);
+	            }
+
+	            if (args.length < n) {
+	                return getCurryClosure(args);
+	            }
+
+	            return fn.apply(this, args);
+	        }
+
+	        return curryClosure;
+	    }
+
+	    return getCurryClosure([]);
+	}
+
+	module.exports = curry(function (object, property) {
+	    return hasOwn.call(object, property);
+	});
 
 /***/ },
-/* 15 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var getInstantiatorFunction = __webpack_require__(10);
+
+	module.exports = function (fn, args) {
+		return getInstantiatorFunction(args.length)(fn, args);
+	};
+
+/***/ },
+/* 10 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	module.exports = (function () {
+
+	    'use strict';
+
+	    var fns = {};
+
+	    return function (len) {
+
+	        if (!fns[len]) {
+
+	            var args = [];
+	            var i = 0;
+
+	            for (; i < len; i++) {
+	                args.push('a[' + i + ']');
+	            }
+
+	            fns[len] = new Function('c', 'a', 'return new c(' + args.join(',') + ')');
+	        }
+
+	        return fns[len];
+	    };
+	})();
+
+/***/ },
+/* 11 */
+/***/ function(module, exports) {
+
+	// Copyright Joyent, Inc. and other Node contributors.
+	//
+	// Permission is hereby granted, free of charge, to any person obtaining a
+	// copy of this software and associated documentation files (the
+	// "Software"), to deal in the Software without restriction, including
+	// without limitation the rights to use, copy, modify, merge, publish,
+	// distribute, sublicense, and/or sell copies of the Software, and to permit
+	// persons to whom the Software is furnished to do so, subject to the
+	// following conditions:
+	//
+	// The above copyright notice and this permission notice shall be included
+	// in all copies or substantial portions of the Software.
+	//
+	// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+	// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+	// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+	// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+	// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+	// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+	'use strict';
+
+	function EventEmitter() {
+	  this._events = this._events || {};
+	  this._maxListeners = this._maxListeners || undefined;
+	}
+	module.exports = EventEmitter;
+
+	// Backwards-compat with node 0.10.x
+	EventEmitter.EventEmitter = EventEmitter;
+
+	EventEmitter.prototype._events = undefined;
+	EventEmitter.prototype._maxListeners = undefined;
+
+	// By default EventEmitters will print a warning if more than 10 listeners are
+	// added to it. This is a useful default which helps finding memory leaks.
+	EventEmitter.defaultMaxListeners = 10;
+
+	// Obviously not all Emitters should be limited to 10. This function allows
+	// that to be increased. Set to zero for unlimited.
+	EventEmitter.prototype.setMaxListeners = function (n) {
+	  if (!isNumber(n) || n < 0 || isNaN(n)) throw TypeError('n must be a positive number');
+	  this._maxListeners = n;
+	  return this;
+	};
+
+	EventEmitter.prototype.emit = function (type) {
+	  var er, handler, len, args, i, listeners;
+
+	  if (!this._events) this._events = {};
+
+	  // If there is no 'error' event listener then throw.
+	  if (type === 'error') {
+	    if (!this._events.error || isObject(this._events.error) && !this._events.error.length) {
+	      er = arguments[1];
+	      if (er instanceof Error) {
+	        throw er; // Unhandled 'error' event
+	      }
+	      throw TypeError('Uncaught, unspecified "error" event.');
+	    }
+	  }
+
+	  handler = this._events[type];
+
+	  if (isUndefined(handler)) return false;
+
+	  if (isFunction(handler)) {
+	    switch (arguments.length) {
+	      // fast cases
+	      case 1:
+	        handler.call(this);
+	        break;
+	      case 2:
+	        handler.call(this, arguments[1]);
+	        break;
+	      case 3:
+	        handler.call(this, arguments[1], arguments[2]);
+	        break;
+	      // slower
+	      default:
+	        args = Array.prototype.slice.call(arguments, 1);
+	        handler.apply(this, args);
+	    }
+	  } else if (isObject(handler)) {
+	    args = Array.prototype.slice.call(arguments, 1);
+	    listeners = handler.slice();
+	    len = listeners.length;
+	    for (i = 0; i < len; i++) listeners[i].apply(this, args);
+	  }
+
+	  return true;
+	};
+
+	EventEmitter.prototype.addListener = function (type, listener) {
+	  var m;
+
+	  if (!isFunction(listener)) throw TypeError('listener must be a function');
+
+	  if (!this._events) this._events = {};
+
+	  // To avoid recursion in the case that type === "newListener"! Before
+	  // adding it to the listeners, first emit "newListener".
+	  if (this._events.newListener) this.emit('newListener', type, isFunction(listener.listener) ? listener.listener : listener);
+
+	  if (!this._events[type])
+	    // Optimize the case of one listener. Don't need the extra array object.
+	    this._events[type] = listener;else if (isObject(this._events[type]))
+	    // If we've already got an array, just append.
+	    this._events[type].push(listener);else
+	    // Adding the second element, need to change to array.
+	    this._events[type] = [this._events[type], listener];
+
+	  // Check for listener leak
+	  if (isObject(this._events[type]) && !this._events[type].warned) {
+	    if (!isUndefined(this._maxListeners)) {
+	      m = this._maxListeners;
+	    } else {
+	      m = EventEmitter.defaultMaxListeners;
+	    }
+
+	    if (m && m > 0 && this._events[type].length > m) {
+	      this._events[type].warned = true;
+	      console.error('(node) warning: possible EventEmitter memory ' + 'leak detected. %d listeners added. ' + 'Use emitter.setMaxListeners() to increase limit.', this._events[type].length);
+	      if (typeof console.trace === 'function') {
+	        // not supported in IE 10
+	        console.trace();
+	      }
+	    }
+	  }
+
+	  return this;
+	};
+
+	EventEmitter.prototype.on = EventEmitter.prototype.addListener;
+
+	EventEmitter.prototype.once = function (type, listener) {
+	  if (!isFunction(listener)) throw TypeError('listener must be a function');
+
+	  var fired = false;
+
+	  function g() {
+	    this.removeListener(type, g);
+
+	    if (!fired) {
+	      fired = true;
+	      listener.apply(this, arguments);
+	    }
+	  }
+
+	  g.listener = listener;
+	  this.on(type, g);
+
+	  return this;
+	};
+
+	// emits a 'removeListener' event iff the listener was removed
+	EventEmitter.prototype.removeListener = function (type, listener) {
+	  var list, position, length, i;
+
+	  if (!isFunction(listener)) throw TypeError('listener must be a function');
+
+	  if (!this._events || !this._events[type]) return this;
+
+	  list = this._events[type];
+	  length = list.length;
+	  position = -1;
+
+	  if (list === listener || isFunction(list.listener) && list.listener === listener) {
+	    delete this._events[type];
+	    if (this._events.removeListener) this.emit('removeListener', type, listener);
+	  } else if (isObject(list)) {
+	    for (i = length; i-- > 0;) {
+	      if (list[i] === listener || list[i].listener && list[i].listener === listener) {
+	        position = i;
+	        break;
+	      }
+	    }
+
+	    if (position < 0) return this;
+
+	    if (list.length === 1) {
+	      list.length = 0;
+	      delete this._events[type];
+	    } else {
+	      list.splice(position, 1);
+	    }
+
+	    if (this._events.removeListener) this.emit('removeListener', type, listener);
+	  }
+
+	  return this;
+	};
+
+	EventEmitter.prototype.removeAllListeners = function (type) {
+	  var key, listeners;
+
+	  if (!this._events) return this;
+
+	  // not listening for removeListener, no need to emit
+	  if (!this._events.removeListener) {
+	    if (arguments.length === 0) this._events = {};else if (this._events[type]) delete this._events[type];
+	    return this;
+	  }
+
+	  // emit removeListener for all listeners on all events
+	  if (arguments.length === 0) {
+	    for (key in this._events) {
+	      if (key === 'removeListener') continue;
+	      this.removeAllListeners(key);
+	    }
+	    this.removeAllListeners('removeListener');
+	    this._events = {};
+	    return this;
+	  }
+
+	  listeners = this._events[type];
+
+	  if (isFunction(listeners)) {
+	    this.removeListener(type, listeners);
+	  } else if (listeners) {
+	    // LIFO order
+	    while (listeners.length) this.removeListener(type, listeners[listeners.length - 1]);
+	  }
+	  delete this._events[type];
+
+	  return this;
+	};
+
+	EventEmitter.prototype.listeners = function (type) {
+	  var ret;
+	  if (!this._events || !this._events[type]) ret = [];else if (isFunction(this._events[type])) ret = [this._events[type]];else ret = this._events[type].slice();
+	  return ret;
+	};
+
+	EventEmitter.prototype.listenerCount = function (type) {
+	  if (this._events) {
+	    var evlistener = this._events[type];
+
+	    if (isFunction(evlistener)) return 1;else if (evlistener) return evlistener.length;
+	  }
+	  return 0;
+	};
+
+	EventEmitter.listenerCount = function (emitter, type) {
+	  return emitter.listenerCount(type);
+	};
+
+	function isFunction(arg) {
+	  return typeof arg === 'function';
+	}
+
+	function isNumber(arg) {
+	  return typeof arg === 'number';
+	}
+
+	function isObject(arg) {
+	  return typeof arg === 'object' && arg !== null;
+	}
+
+	function isUndefined(arg) {
+	  return arg === void 0;
+	}
+
+/***/ },
+/* 12 */
+/***/ function(module, exports) {
 
 	'use strict';
 
@@ -3196,8 +2998,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
+/* 13 */
+/***/ function(module, exports) {
 
 	'use strict';
 
@@ -3228,13 +3030,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 17 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var hasOwn = __webpack_require__(21);
-	var VALIDATE = __webpack_require__(16);
+	var hasOwn = __webpack_require__(8);
+	var VALIDATE = __webpack_require__(13);
 
 	module.exports = function (REGION) {
 
@@ -3443,17 +3245,366 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 18 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var Region = __webpack_require__(10);
+	Object.defineProperty(exports, '__esModule', {
+	    value: true
+	});
+	var Region = __webpack_require__(6);
+	var assign = __webpack_require__(2);
+	var DragHelper = __webpack_require__(16);
+	var toHsv = __webpack_require__(3).toHsv;
 
-	__webpack_require__(23);
-	__webpack_require__(24);
+	function emptyFn() {}
 
-	var COMPUTE_ALIGN_REGION = __webpack_require__(25);
+	exports['default'] = {
+
+	    toColorValue: function toColorValue(value) {
+	        if (typeof value == 'string') {
+	            return toHsv(value);
+	        }
+
+	        return {
+	            h: value.h,
+	            s: value.s,
+	            v: value.v,
+	            a: value.a
+	        };
+	    },
+
+	    onMouseDown: function onMouseDown(event) {
+	        event.preventDefault();
+
+	        var region = Region.fromDOM(this.refs.el);
+	        var info = this.getEventInfo(event, region);
+
+	        DragHelper(event, {
+	            scope: this,
+
+	            constrainTo: region,
+
+	            onDragStart: function onDragStart(event, config) {
+	                config.initialPoint = info;
+
+	                config.minLeft = 0;
+	                config.maxLeft = region.width;
+
+	                this.handleDragStart(event);
+	            },
+	            onDrag: function onDrag(event, config) {
+	                var info = this.getEventInfo(event, region);
+
+	                this.updateColor(info);
+	                this.handleDrag(event, config);
+	            },
+	            onDrop: function onDrop(event, config) {
+	                var info = this.getEventInfo(event, region);
+
+	                this.updateColor(info);
+
+	                this.handleDrop(event, config);
+	            }
+	        });
+
+	        this.updateColor(info);
+	        this.handleMouseDown(event, { initialPoint: info });
+	    },
+
+	    handleMouseDown: function handleMouseDown(event, config) {
+
+	        ;(this.props.onMouseDown || emptyFn).apply(this, this.getColors());
+	        this.handleDrag(event, config);
+	    },
+
+	    handleUpdate: function handleUpdate(event, config) {
+
+	        var diff = config.diff || { top: 0, left: 0 };
+	        var initialPoint = config.initialPoint;
+
+	        if (initialPoint) {
+
+	            var top;
+	            var left;
+
+	            left = initialPoint.x + diff.left;
+	            top = initialPoint.y + diff.top;
+
+	            left = Math.max(left, config.minLeft);
+	            left = Math.min(left, config.maxLeft);
+
+	            this.state.top = top;
+	            this.state.left = left;
+
+	            this.state.mouseDown = {
+	                x: left,
+	                y: top,
+	                width: initialPoint.width,
+	                height: initialPoint.height
+	            };
+	        }
+
+	        if (this.props.inPicker) {
+	            //the picker handles the values
+	            return;
+	        }
+
+	        if (!this.props.value) {
+	            this.setState({
+	                value: this.hsv
+	            });
+	        }
+	    },
+
+	    handleDragStart: function handleDragStart(event) {},
+
+	    handleDrag: function handleDrag(event, config) {
+	        this.handleUpdate(event, config);(this.props.onDrag || emptyFn).apply(this, this.getColors());
+	    },
+
+	    handleDrop: function handleDrop(event, config) {
+	        this.handleUpdate(event, config);
+	        this.state.mouseDown = false;(this.props.onChange || emptyFn).apply(this, this.getColors());
+	    },
+
+	    getColors: function getColors() {
+	        var first = this.props.inPicker ? this.hsv : this.toStringValue(this.hsv);
+	        var args = [first];
+
+	        if (!this.props.inPicker) {
+	            args.push(assign({}, this.hsv));
+	        }
+
+	        return args;
+	    },
+
+	    getEventInfo: function getEventInfo(event, region) {
+	        region = region || Region.fromDOM(this.refs.el);
+
+	        var x = event.clientX - region.left;
+	        var y = event.clientY - region.top;
+
+	        return {
+	            x: x,
+	            y: y,
+	            width: region.getWidth(),
+	            height: region.getHeight()
+	        };
+	    }
+	};
+	module.exports = exports['default'];
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var assign = __webpack_require__(2);
+	var Region = __webpack_require__(17);
+	var hasTouch = __webpack_require__(22);
+	var once = __webpack_require__(23);
+
+	var Helper = function Helper(config) {
+	    this.config = config;
+	};
+
+	var EVENTS = {
+	    move: hasTouch ? 'touchmove' : 'mousemove',
+	    up: hasTouch ? 'touchend' : 'mouseup'
+	};
+
+	function emptyFn() {}
+
+	function getPageCoords(event) {
+	    var firstTouch;
+
+	    var pageX = event.pageX;
+	    var pageY = event.pageY;
+
+	    if (hasTouch && event.touches && (firstTouch = event.touches[0])) {
+	        pageX = firstTouch.pageX;
+	        pageY = firstTouch.pageY;
+	    }
+
+	    return {
+	        pageX: pageX,
+	        pageY: pageY
+	    };
+	}
+
+	assign(Helper.prototype, {
+
+	    /**
+	     * Should be called on a mousedown event
+	     *
+	     * @param  {Event} event
+	     * @return {[type]}       [description]
+	     */
+	    initDrag: function initDrag(event) {
+
+	        this.onDragInit(event);
+
+	        var onDragStart = once(this.onDragStart, this);
+	        var target = hasTouch ? event.target : window;
+
+	        var mouseMoveListener = (function (event) {
+	            onDragStart(event);
+	            this.onDrag(event);
+	        }).bind(this);
+
+	        var mouseUpListener = (function (event) {
+
+	            this.onDrop(event);
+
+	            target.removeEventListener(EVENTS.move, mouseMoveListener);
+	            target.removeEventListener(EVENTS.up, mouseUpListener);
+	        }).bind(this);
+
+	        target.addEventListener(EVENTS.move, mouseMoveListener, false);
+	        target.addEventListener(EVENTS.up, mouseUpListener);
+	    },
+
+	    onDragInit: function onDragInit(event) {
+
+	        var config = {
+	            diff: {
+	                left: 0,
+	                top: 0
+	            }
+	        };
+	        this.state = {
+	            config: config
+	        };
+
+	        if (this.config.region) {
+	            this.state.initialRegion = Region.from(this.config.region);
+	            this.state.dragRegion = config.dragRegion = this.state.initialRegion.clone();
+	        }
+	        if (this.config.constrainTo) {
+	            this.state.constrainTo = Region.from(this.config.constrainTo);
+	        }
+
+	        this.callConfig('onDragInit', event);
+	    },
+
+	    /**
+	     * Called when the first mousemove event occurs after drag is initialized
+	     * @param  {Event} event
+	     */
+	    onDragStart: function onDragStart(event) {
+	        this.state.initPageCoords = getPageCoords(event);
+
+	        this.state.didDrag = this.state.config.didDrag = true;
+	        this.callConfig('onDragStart', event);
+	    },
+
+	    /**
+	     * Called on all mousemove events after drag is initialized.
+	     *
+	     * @param  {Event} event
+	     */
+	    onDrag: function onDrag(event) {
+
+	        var config = this.state.config;
+
+	        var initPageCoords = this.state.initPageCoords;
+	        var eventCoords = getPageCoords(event);
+
+	        var diff = config.diff = {
+	            left: eventCoords.pageX - initPageCoords.pageX,
+	            top: eventCoords.pageY - initPageCoords.pageY
+	        };
+
+	        if (this.state.initialRegion) {
+	            var dragRegion = config.dragRegion;
+
+	            //set the dragRegion to initial coords
+	            dragRegion.set(this.state.initialRegion);
+
+	            //shift it to the new position
+	            dragRegion.shift(diff);
+
+	            if (this.state.constrainTo) {
+	                //and finally constrain it if it's the case
+	                dragRegion.constrainTo(this.state.constrainTo);
+
+	                diff.left = dragRegion.left - this.state.initialRegion.left;
+	                diff.top = dragRegion.top - this.state.initialRegion.top;
+	            }
+
+	            config.dragRegion = dragRegion;
+	        }
+
+	        this.callConfig('onDrag', event);
+	    },
+
+	    /**
+	     * Called on the mouseup event on window
+	     *
+	     * @param  {Event} event
+	     */
+	    onDrop: function onDrop(event) {
+	        this.callConfig('onDrop', event);
+
+	        this.state = null;
+	    },
+
+	    callConfig: function callConfig(fnName, event) {
+	        var config = this.state.config;
+	        var args = [event, config];
+
+	        var fn = this.config[fnName];
+
+	        if (fn) {
+	            fn.apply(this, args);
+	        }
+	    }
+
+	});
+
+	module.exports = function (event, config) {
+
+	    if (config.scope) {
+	        var skippedKeys = {
+	            scope: 1,
+	            region: 1,
+	            constrainTo: 1
+	        };
+
+	        Object.keys(config).forEach(function (key) {
+	            var value = config[key];
+
+	            if (key in skippedKeys) {
+	                return;
+	            }
+
+	            if (typeof value == 'function') {
+	                config[key] = value.bind(config.scope);
+	            }
+	        });
+	    }
+	    var helper = new Helper(config);
+
+	    helper.initDrag(event);
+
+	    return helper;
+	};
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var Region = __webpack_require__(6);
+
+	__webpack_require__(18);
+	__webpack_require__(19);
+
+	var COMPUTE_ALIGN_REGION = __webpack_require__(20);
 
 	/**
 	 * region-align module exposes methods for aligning {@link Element} and {@link Region} instances
@@ -3627,342 +3778,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Region;
 
 /***/ },
-/* 19 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
-
-	module.exports = 'ontouchstart' in global || global.DocumentTouch && document instanceof DocumentTouch;
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
-
-/***/ },
-/* 20 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var getInstantiatorFunction = __webpack_require__(26);
-
-	module.exports = function (fn, args) {
-		return getInstantiatorFunction(args.length)(fn, args);
-	};
-
-/***/ },
-/* 21 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var hasOwn = Object.prototype.hasOwnProperty;
-
-	function curry(fn, n) {
-
-	    if (typeof n !== 'number') {
-	        n = fn.length;
-	    }
-
-	    function getCurryClosure(prevArgs) {
-
-	        function curryClosure() {
-
-	            var len = arguments.length;
-	            var args = [].concat(prevArgs);
-
-	            if (len) {
-	                args.push.apply(args, arguments);
-	            }
-
-	            if (args.length < n) {
-	                return getCurryClosure(args);
-	            }
-
-	            return fn.apply(this, args);
-	        }
-
-	        return curryClosure;
-	    }
-
-	    return getCurryClosure([]);
-	}
-
-	module.exports = curry(function (object, property) {
-	    return hasOwn.call(object, property);
-	});
-
-/***/ },
-/* 22 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// Copyright Joyent, Inc. and other Node contributors.
-	//
-	// Permission is hereby granted, free of charge, to any person obtaining a
-	// copy of this software and associated documentation files (the
-	// "Software"), to deal in the Software without restriction, including
-	// without limitation the rights to use, copy, modify, merge, publish,
-	// distribute, sublicense, and/or sell copies of the Software, and to permit
-	// persons to whom the Software is furnished to do so, subject to the
-	// following conditions:
-	//
-	// The above copyright notice and this permission notice shall be included
-	// in all copies or substantial portions of the Software.
-	//
-	// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-	// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-	// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-	// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-	// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-	// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-	// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-	'use strict';
-
-	function EventEmitter() {
-	  this._events = this._events || {};
-	  this._maxListeners = this._maxListeners || undefined;
-	}
-	module.exports = EventEmitter;
-
-	// Backwards-compat with node 0.10.x
-	EventEmitter.EventEmitter = EventEmitter;
-
-	EventEmitter.prototype._events = undefined;
-	EventEmitter.prototype._maxListeners = undefined;
-
-	// By default EventEmitters will print a warning if more than 10 listeners are
-	// added to it. This is a useful default which helps finding memory leaks.
-	EventEmitter.defaultMaxListeners = 10;
-
-	// Obviously not all Emitters should be limited to 10. This function allows
-	// that to be increased. Set to zero for unlimited.
-	EventEmitter.prototype.setMaxListeners = function (n) {
-	  if (!isNumber(n) || n < 0 || isNaN(n)) throw TypeError('n must be a positive number');
-	  this._maxListeners = n;
-	  return this;
-	};
-
-	EventEmitter.prototype.emit = function (type) {
-	  var er, handler, len, args, i, listeners;
-
-	  if (!this._events) this._events = {};
-
-	  // If there is no 'error' event listener then throw.
-	  if (type === 'error') {
-	    if (!this._events.error || isObject(this._events.error) && !this._events.error.length) {
-	      er = arguments[1];
-	      if (er instanceof Error) {
-	        throw er; // Unhandled 'error' event
-	      }
-	      throw TypeError('Uncaught, unspecified "error" event.');
-	    }
-	  }
-
-	  handler = this._events[type];
-
-	  if (isUndefined(handler)) return false;
-
-	  if (isFunction(handler)) {
-	    switch (arguments.length) {
-	      // fast cases
-	      case 1:
-	        handler.call(this);
-	        break;
-	      case 2:
-	        handler.call(this, arguments[1]);
-	        break;
-	      case 3:
-	        handler.call(this, arguments[1], arguments[2]);
-	        break;
-	      // slower
-	      default:
-	        len = arguments.length;
-	        args = new Array(len - 1);
-	        for (i = 1; i < len; i++) args[i - 1] = arguments[i];
-	        handler.apply(this, args);
-	    }
-	  } else if (isObject(handler)) {
-	    len = arguments.length;
-	    args = new Array(len - 1);
-	    for (i = 1; i < len; i++) args[i - 1] = arguments[i];
-
-	    listeners = handler.slice();
-	    len = listeners.length;
-	    for (i = 0; i < len; i++) listeners[i].apply(this, args);
-	  }
-
-	  return true;
-	};
-
-	EventEmitter.prototype.addListener = function (type, listener) {
-	  var m;
-
-	  if (!isFunction(listener)) throw TypeError('listener must be a function');
-
-	  if (!this._events) this._events = {};
-
-	  // To avoid recursion in the case that type === "newListener"! Before
-	  // adding it to the listeners, first emit "newListener".
-	  if (this._events.newListener) this.emit('newListener', type, isFunction(listener.listener) ? listener.listener : listener);
-
-	  if (!this._events[type])
-	    // Optimize the case of one listener. Don't need the extra array object.
-	    this._events[type] = listener;else if (isObject(this._events[type]))
-	    // If we've already got an array, just append.
-	    this._events[type].push(listener);else
-	    // Adding the second element, need to change to array.
-	    this._events[type] = [this._events[type], listener];
-
-	  // Check for listener leak
-	  if (isObject(this._events[type]) && !this._events[type].warned) {
-	    var m;
-	    if (!isUndefined(this._maxListeners)) {
-	      m = this._maxListeners;
-	    } else {
-	      m = EventEmitter.defaultMaxListeners;
-	    }
-
-	    if (m && m > 0 && this._events[type].length > m) {
-	      this._events[type].warned = true;
-	      console.error('(node) warning: possible EventEmitter memory ' + 'leak detected. %d listeners added. ' + 'Use emitter.setMaxListeners() to increase limit.', this._events[type].length);
-	      if (typeof console.trace === 'function') {
-	        // not supported in IE 10
-	        console.trace();
-	      }
-	    }
-	  }
-
-	  return this;
-	};
-
-	EventEmitter.prototype.on = EventEmitter.prototype.addListener;
-
-	EventEmitter.prototype.once = function (type, listener) {
-	  if (!isFunction(listener)) throw TypeError('listener must be a function');
-
-	  var fired = false;
-
-	  function g() {
-	    this.removeListener(type, g);
-
-	    if (!fired) {
-	      fired = true;
-	      listener.apply(this, arguments);
-	    }
-	  }
-
-	  g.listener = listener;
-	  this.on(type, g);
-
-	  return this;
-	};
-
-	// emits a 'removeListener' event iff the listener was removed
-	EventEmitter.prototype.removeListener = function (type, listener) {
-	  var list, position, length, i;
-
-	  if (!isFunction(listener)) throw TypeError('listener must be a function');
-
-	  if (!this._events || !this._events[type]) return this;
-
-	  list = this._events[type];
-	  length = list.length;
-	  position = -1;
-
-	  if (list === listener || isFunction(list.listener) && list.listener === listener) {
-	    delete this._events[type];
-	    if (this._events.removeListener) this.emit('removeListener', type, listener);
-	  } else if (isObject(list)) {
-	    for (i = length; i-- > 0;) {
-	      if (list[i] === listener || list[i].listener && list[i].listener === listener) {
-	        position = i;
-	        break;
-	      }
-	    }
-
-	    if (position < 0) return this;
-
-	    if (list.length === 1) {
-	      list.length = 0;
-	      delete this._events[type];
-	    } else {
-	      list.splice(position, 1);
-	    }
-
-	    if (this._events.removeListener) this.emit('removeListener', type, listener);
-	  }
-
-	  return this;
-	};
-
-	EventEmitter.prototype.removeAllListeners = function (type) {
-	  var key, listeners;
-
-	  if (!this._events) return this;
-
-	  // not listening for removeListener, no need to emit
-	  if (!this._events.removeListener) {
-	    if (arguments.length === 0) this._events = {};else if (this._events[type]) delete this._events[type];
-	    return this;
-	  }
-
-	  // emit removeListener for all listeners on all events
-	  if (arguments.length === 0) {
-	    for (key in this._events) {
-	      if (key === 'removeListener') continue;
-	      this.removeAllListeners(key);
-	    }
-	    this.removeAllListeners('removeListener');
-	    this._events = {};
-	    return this;
-	  }
-
-	  listeners = this._events[type];
-
-	  if (isFunction(listeners)) {
-	    this.removeListener(type, listeners);
-	  } else {
-	    // LIFO order
-	    while (listeners.length) this.removeListener(type, listeners[listeners.length - 1]);
-	  }
-	  delete this._events[type];
-
-	  return this;
-	};
-
-	EventEmitter.prototype.listeners = function (type) {
-	  var ret;
-	  if (!this._events || !this._events[type]) ret = [];else if (isFunction(this._events[type])) ret = [this._events[type]];else ret = this._events[type].slice();
-	  return ret;
-	};
-
-	EventEmitter.listenerCount = function (emitter, type) {
-	  var ret;
-	  if (!emitter._events || !emitter._events[type]) ret = 0;else if (isFunction(emitter._events[type])) ret = 1;else ret = emitter._events[type].length;
-	  return ret;
-	};
-
-	function isFunction(arg) {
-	  return typeof arg === 'function';
-	}
-
-	function isNumber(arg) {
-	  return typeof arg === 'number';
-	}
-
-	function isObject(arg) {
-	  return typeof arg === 'object' && arg !== null;
-	}
-
-	function isUndefined(arg) {
-	  return arg === void 0;
-	}
-
-/***/ },
-/* 23 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var Region = __webpack_require__(10);
+	var Region = __webpack_require__(6);
 
 	/**
 	 * @static
@@ -4071,12 +3892,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 24 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var Region = __webpack_require__(10);
+	var Region = __webpack_require__(6);
 
 	/**
 	 *
@@ -4113,14 +3934,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 25 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var ALIGN_TO_NORMALIZED = __webpack_require__(27);
+	var ALIGN_TO_NORMALIZED = __webpack_require__(21);
 
-	var Region = __webpack_require__(10);
+	var Region = __webpack_require__(6);
 
 	/**
 	 * @localdoc Given source and target regions, and the given alignments required, returns a region that is the resulting allignment.
@@ -4193,42 +4014,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = COMPUTE_ALIGN_REGION;
 
 /***/ },
-/* 26 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	module.exports = (function () {
-
-	    'use strict';
-
-	    var fns = {};
-
-	    return function (len) {
-
-	        if (!fns[len]) {
-
-	            var args = [];
-	            var i = 0;
-
-	            for (; i < len; i++) {
-	                args.push('a[' + i + ']');
-	            }
-
-	            fns[len] = new Function('c', 'a', 'return new c(' + args.join(',') + ')');
-	        }
-
-	        return fns[len];
-	    };
-	})();
-
-/***/ },
-/* 27 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var Region = __webpack_require__(10);
+	var Region = __webpack_require__(6);
 
 	/**
 	 *
@@ -4394,6 +4185,278 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	module.exports = ALIGN_TO_NORMALIZED;
+
+/***/ },
+/* 22 */
+/***/ function(module, exports) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
+
+	module.exports = 'ontouchstart' in global || global.DocumentTouch && document instanceof DocumentTouch;
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 23 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	'use once';
+
+	module.exports = function once(fn, scope) {
+
+	    var called;
+	    var result;
+
+	    return function () {
+	        if (called) {
+	            return result;
+	        }
+
+	        called = true;
+
+	        return result = fn.apply(scope || this, arguments);
+	    };
+	};
+
+/***/ },
+/* 24 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	module.exports = function validate(info) {
+	    var height = info.height;
+	    var width = info.width;
+
+	    if (info.x < 0) {
+	        info.x = 0;
+	    }
+
+	    if (info.x >= width) {
+	        info.x = width;
+	    }
+
+	    if (info.y < 0) {
+	        info.y = 0;
+	    }
+
+	    if (info.y >= height) {
+	        info.y = height;
+	    }
+
+	    return info;
+	};
+
+/***/ },
+/* 25 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	module.exports = 'red';
+
+/***/ },
+/* 26 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var assign = __webpack_require__(2);
+	var toColor = __webpack_require__(3).toColor;
+
+	module.exports = function toStringValue(color) {
+	    color = toColor(assign({}, color));
+
+	    return color.toRgb().a == 1 ? color.toHexString() : color.toRgbString();
+	};
+
+/***/ },
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	    value: true
+	});
+	var React = __webpack_require__(1);
+	var Region = __webpack_require__(6);
+	var assign = __webpack_require__(2);
+	var fromRatio = __webpack_require__(3).fromRatio;
+	var common = __webpack_require__(15);
+
+	var VALIDATE = __webpack_require__(24);
+
+	exports['default'] = React.createClass(assign({
+
+	    displayName: 'SaturationSpectrum',
+
+	    getDefaultProps: function getDefaultProps() {
+	        return {
+	            height: 300,
+	            width: 300,
+	            pointerSize: 7,
+	            defaultColor: __webpack_require__(25)
+	        };
+	    },
+
+	    getInitialState: function getInitialState() {
+	        return {
+	            pointerTop: null,
+	            pointerLeft: null
+	        };
+	    },
+
+	    componentDidUpdate: function componentDidUpdate() {
+	        // this.updateDragPositionIf()
+	    },
+
+	    componentDidMount: function componentDidMount() {
+	        this.updateDragPositionIf();
+	    },
+
+	    updateDragPositionIf: function updateDragPositionIf() {
+	        if (!this.props.height || !this.props.width) {
+	            this.setState({});
+	        }
+	    },
+
+	    getDragPosition: function getDragPosition(hsv) {
+	        hsv = hsv || this.hsv;
+
+	        var width = this.props.width;
+	        var height = this.props.height;
+	        var sizeDefined = width && height;
+
+	        if (!sizeDefined && !this.isMounted()) {
+	            return null;
+	        }
+
+	        var region;
+
+	        if (!sizeDefined) {
+	            region = Region.fromDOM(this.refs.el);
+	            height = height || region.getHeight();
+	            width = width || region.getWidth();
+	        }
+
+	        var x = hsv.s * width;
+	        var y = height - hsv.v * height;
+	        var size = this.props.pointerSize;
+	        var diff = Math.floor(size / 2);
+
+	        if (this.props.value && this.state.mouseDown) {
+	            x = this.state.mouseDown.x;
+	        }
+
+	        return {
+	            left: x - diff,
+	            top: y - diff
+	        };
+	    },
+
+	    prepareBackgroundColor: function prepareBackgroundColor(color) {
+	        var hsv = color;
+
+	        var col = fromRatio({
+	            h: hsv.h % 360 / 360,
+	            s: 1,
+	            v: 1
+	        });
+
+	        return col.toRgbString();
+	    },
+
+	    prepareProps: function prepareProps(thisProps, state) {
+	        var props = assign({}, thisProps);
+
+	        var color = state.value || props.value || props.defaultValue || props.defaultColor;
+
+	        props.color = color;
+
+	        this.hsv = this.toColorValue(color);
+
+	        props.style = this.prepareStyle(props);
+	        props.className = this.prepareClassName(props);
+
+	        return props;
+	    },
+
+	    prepareClassName: function prepareClassName(props) {
+	        var className = props.className || '';
+
+	        className += ' cp-saturation-spectrum';
+
+	        return className;
+	    },
+
+	    prepareStyle: function prepareStyle(props) {
+	        var style = props.style || {};
+
+	        if (props.height) {
+	            style.height = props.height;
+	        }
+	        if (props.width) {
+	            style.width = props.width;
+	        }
+
+	        style.backgroundColor = this.prepareBackgroundColor(this.hsv);
+
+	        return style;
+	    },
+
+	    render: function render() {
+
+	        var props = this.p = this.prepareProps(this.props, this.state);
+
+	        var dragStyle = {
+	            width: this.props.pointerSize,
+	            height: this.props.pointerSize
+	        };
+
+	        var dragPos = this.getDragPosition();
+
+	        if (dragPos) {
+	            dragStyle.top = dragPos.top;
+	            dragStyle.left = dragPos.left;
+	            dragStyle.display = 'block';
+	        }
+
+	        return React.createElement(
+	            'div',
+	            { ref: 'el', className: props.className, style: props.style, onMouseDown: this.onMouseDown },
+	            React.createElement(
+	                'div',
+	                { className: 'cp-saturation-white' },
+	                React.createElement('div', { className: 'cp-saturation-black' })
+	            ),
+	            React.createElement(
+	                'div',
+	                { className: 'cp-saturation-drag', style: dragStyle },
+	                React.createElement('div', { className: 'inner' })
+	            )
+	        );
+	    },
+
+	    getSaturationForPoint: function getSaturationForPoint(point) {
+	        return point.x / point.width;
+	    },
+
+	    getColorValueForPoint: function getColorValueForPoint(point) {
+	        return (point.height - point.y) / point.height;
+	    },
+
+	    updateColor: function updateColor(point) {
+	        point = VALIDATE(point);
+
+	        this.hsv.s = this.getSaturationForPoint(point);
+	        this.hsv.v = this.getColorValueForPoint(point);
+	    },
+
+	    toStringValue: __webpack_require__(26)
+	}, common));
+	module.exports = exports['default'];
 
 /***/ }
 /******/ ])

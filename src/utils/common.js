@@ -25,7 +25,7 @@ export default {
     onMouseDown: function(event){
         event.preventDefault()
 
-        var region = Region.fromDOM(this.getDOMNode())
+        var region = Region.fromDOM(this.refs.el)
         var info   = this.getEventInfo(event, region)
 
         DragHelper(event, {
@@ -134,7 +134,7 @@ export default {
     },
 
     getEventInfo: function(event, region){
-        region = region || Region.fromDOM(this.getDOMNode())
+        region = region || Region.fromDOM(this.refs.el)
 
         var x = event.clientX - region.left
         var y = event.clientY - region.top

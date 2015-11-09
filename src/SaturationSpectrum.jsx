@@ -56,7 +56,7 @@ export default React.createClass(assign({
         var region
 
         if (!sizeDefined){
-            region = Region.fromDOM(this.getDOMNode())
+            region = Region.fromDOM(this.refs.el)
             height = height || region.getHeight()
             width  = width  || region.getWidth()
         }
@@ -144,7 +144,7 @@ export default React.createClass(assign({
         }
 
         return (
-            <div className={props.className} style={props.style} onMouseDown={this.onMouseDown}>
+            <div ref="el" className={props.className} style={props.style} onMouseDown={this.onMouseDown}>
                 <div className='cp-saturation-white'>
                     <div className='cp-saturation-black' />
                 </div>

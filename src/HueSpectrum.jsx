@@ -70,7 +70,7 @@ module.exports = React.createClass(assign({
             dragStyle.display = 'block'
         }
         return (
-            <div className='cp-hue-spectrum' style={style} onMouseDown={this.onMouseDown}>
+            <div ref="el" className='cp-hue-spectrum' style={style} onMouseDown={this.onMouseDown}>
                 <div className="cp-hue-drag" style={dragStyle}>
                     <div className="inner" />
                 </div>
@@ -85,7 +85,7 @@ module.exports = React.createClass(assign({
             return null
         }
 
-        var height = this.props.height || Region.fromDOM(this.getDOMNode()).getHeight()
+        var height = this.props.height || Region.fromDOM(this.refs.el).getHeight()
         var size   = this.props.pointerSize
 
         var pos  = Math.round(hsv.h * height / 360)
